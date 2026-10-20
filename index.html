@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InstaPic - Galería Interactiva</title>
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Barra Promocional Top -->
+  <div class="promo-bar">
+    <span>✨ Bienvenida a <strong>InstaPic</strong> — Organiza, edita y descarga tus mejores recuerdos al instante</span>
+  </div>
+
+  <!-- Header & Navegación Principales -->
+  <header class="main-header">
+    <div class="header-container">
+      <div class="brand-logo">
+        <div class="logo-icon"><i class="fa-solid fa-camera-retro"></i></div>
+        <span class="logo-text">InstaPic</span>
+      </div>
+
+      <nav class="main-nav">
+        <ul>
+          <li><a href="#" class="nav-link active"><i class="fa-solid fa-grid-2"></i> Galería</a></li>
+          <li><a href="#" class="nav-link"><i class="fa-solid fa-images"></i> Álbumes</a></li>
+          <li><a href="#" class="nav-link"><i class="fa-solid fa-wand-magic-sparkles"></i> Editor</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <label for="fileUploadInput" class="btn btn-primary">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Subir Fotos</span>
+        </label>
+        <input type="file" id="fileUploadInput" accept="image/*" multiple hidden>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal de la App -->
+  <main class="app-container">
+    
+    <!-- Barra Lateral: Álbumes -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h3><i class="fa-solid fa-folder-closed"></i> Mis Álbumes</h3>
+        <button id="btnNewAlbum" class="btn-icon" title="Crear Álbum">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+
+      <ul class="album-list" id="albumList">
+        <li class="album-item active" data-album-id="all">
+          <div class="album-info">
+            <i class="fa-solid fa-border-all"></i>
+            <span>Todas las fotos</span>
+          </div>
+          <span class="album-count" id="countAll">0</span>
+        </li>
+        <li class="album-item" data-album-id="favoritos">
+          <div class="album-info">
+            <i class="fa-solid fa-heart"></i>
+            <span>Favoritos</span>
+          </div>
+          <span class="album-count" id="countFavoritos">0</span>
+        </li>
+      </ul>
+
+      <!-- Zona de carga rápida en Sidebar -->
+      <div class="drop-zone" id="dropZone">
+        <i class="fa-solid fa-file-circle-plus"></i>
+        <p>Arrastra fotos aquí para subir</p>
+      </div>
+    </aside>
+
+    <!-- Contenido Principal: Rejilla de Galería -->
+    <section class="gallery-section">
+      <div class="gallery-toolbar">
+        <div class="current-album-title">
+          <h2 id="currentAlbumName">Todas las fotos</h2>
+          <span class="sub-count" id="currentPhotosCount">0 fotos</span>
+        </div>
+
+        <div class="toolbar-controls">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="Buscar por título...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Imágenes -->
+      <div class="photos-grid" id="photosGrid">
+        <!-- Las tarjetas de fotos se generan dinámicamente con JS -->
+      </div>
+
+      <!-- Estado vacío cuando no hay fotos -->
+      <div class="empty-state hidden" id="emptyState">
+        <div class="empty-icon"><i class="fa-solid fa-photo-film"></i></div>
+        <h3>No hay fotos en este álbum</h3>
+        <p>Sube imágenes desde tu teléfono o computadora para comenzar.</p>
+        <label for="fileUploadInput" class="btn btn-secondary">Subir primera foto</label>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL 1: Visor y Editor con Filtros (Canvas) -->
+  <div class="modal hidden" id="editorModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 id="modalTitle"><i class="fa-solid fa-wand-magic-sparkles"></i> Editar e Inspeccionar</h3>
+        <button class="modal-close" id="btnCloseEditor"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="editor-body">
+        <!-- Vista previa Canvas -->
+        <div class="canvas-container">
+          <canvas id="editorCanvas"></canvas>
+        </div>
+
+        <!-- Panel de Ajustes y Filtros -->
+        <div class="filter-controls">
+          <h4>Filtros Rápidos</h4>
+          <div class="filter-presets">
+            <button class="preset-btn active" data-preset="normal">Normal</button>
+            <button class="preset-btn" data-preset="vintage">Vintage</button>
+            <button class="preset-btn" data-preset="bw">B & N</button>
+            <button class="preset-btn" data-preset="warm">Cálido</button>
+
+            <button class="preset-btn" data-preset="cool">Frío</button>
+            <button class="preset-btn" data-preset="dramatic">Drama</button>
+          </div>
+
+          <hr class="divider">
+
+          <h4>Ajustes Manuales</h4>
+          <div class="slider-group">
+            <label>Brillo <span id="valBrightness">100%</span></label>
+            <input type="range" id="sliderBrightness" min="0" max="200" value="100">
+          </div>
+
+          <div class="slider-group">
+            <label>Contraste <span id="valContrast">100%</span></label>
+            <input type="range" id="sliderContrast" min="0" max="200" value="100">
+          </div>
+
+          <div class="slider-group">
+            <label>Saturación <span id="valSaturate">100%</span></label>
+            <input type="range" id="sliderSaturate" min="0" max="200" value="100">
+          </div>
+
+          <div class="slider-group">
+            <label>Sepia <span id="valSepia">0%</span></label>
+            <input type="range" id="sliderSepia" min="0" max="100" value="0">
+          </div>
+
+          <div class="slider-group">
+            <label>Desenfoque <span id="valBlur">0px</span></label>
+            <input type="range" id="sliderBlur" min="0" max="10" value="0">
+          </div>
+
+          <div class="editor-actions">
+            <button id="btnResetFilters" class="btn btn-outline"><i class="fa-solid fa-rotate-left"></i> Restablecer</button>
+            <button id="btnSaveEdited" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Guardar Imagen</button>
+            <button id="btnDownloadCurrent" class="btn btn-accent"><i class="fa-solid fa-download"></i> Descargar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Mover Imagen a un Álbum -->
+  <div class="modal hidden" id="moveModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-folder-arrow-up"></i> Mover a un Álbum</h3>
+        <button class="modal-close" id="btnCloseMove"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p>Selecciona el álbum de destino para esta imagen:</p>
+        <select id="moveAlbumSelect" class="custom-select">
+          <!-- Opciones dinámicas -->
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnCancelMove">Cancelar</button>
+        <button class="btn btn-primary" id="btnConfirmMove">Mover Ahora</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
